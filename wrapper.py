@@ -2,6 +2,9 @@
 # SSH: Single Stage Headless Face Detector
 # Demo
 # by Mahyar Najibi
+# Add mtcnn aligner 
+# Add face recognition module
+# by Dongfeng Yu and Yun Liu
 # ------------------------------------------
 
 from __future__ import print_function
