@@ -108,3 +108,6 @@ venv.bak/
 /cuda
 /nccl
 /scripts
+main_test.py
+main_train.py
+demo.py
