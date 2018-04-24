@@ -18,6 +18,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import demo_0
+import time
 
 
 def parser():
@@ -84,7 +85,7 @@ def do_batch(f, x):
     return list(zip(imgs, keys))
 
 if __name__ == "__main__":
-
+    start = time.time() 
     # Parse arguments
     args = parser()
     args.devices = args.devices.split(',')
@@ -104,7 +105,7 @@ if __name__ == "__main__":
     print('Loading the network...')
     net = caffe.Net(args.prototxt, args.model, caffe.TEST)
     net.name = 'SSH'
-    print('Network loading complete!')
+    print('Loading complete! Total time usage: {0} s'.format(time.time()-start))
     print('Detection Start...')
     # Read image
     assert os.path.isfile(args.im_path),'Please provide a path to an existing image!'
@@ -122,6 +123,7 @@ if __name__ == "__main__":
             temp_face = resize_face(im, det[0], det[1], det[2], det[3], im.shape[0], im.shape[1])
             #cv2.imwrite('data/demo'+str(slice_idx)+'.jpg',temp_face)
             images.append((temp_face,'facecut_'+str(slice_idx)))
+    print('Detection Complete! Total time usage: {0} s'.format(time.time()-start))
     # Perform recognition
     print('Recognition Start...')
     config = tf.ConfigProto() 
@@ -134,29 +136,20 @@ if __name__ == "__main__":
 
 
     images = batch_process(lambda x:do_batch(aligner.align, x), images, args.aligner_batch_size)
-    #from IPython import embed
-    #embed()
     for i in images:
 	if i[0][1] == False:
 	    cv2.imwrite('/SSH/faltyimg_'+str(i)+'.jpg',i[0][0])
     images = [i[0] for i in images]
-    #print('%d samples aligned in %.6fs' % (len(images), time.time() - start))
+    print('%d samples aligned in %.6fs' % (len(images), time.time() - start))
     images_ = {}
     for i in images:
         if i[1] not in images_:
             images_[i[1]] = i[0]
-    #for i in images_:
-        #cv2.imwrite(i[:-4] + '_aligned.jpg', images_[i])
     images = batch_process(lambda x:do_batch(extractor.extract, x), images, args.extractor_batch_size)
-    #print('%d samples extracted in %.6fs' % (len(images), time.time() - start))
+    print('%d samples extracted in %.6fs' % (len(images), time.time() - start))
     images_  =  {}
     for i in images:
         images_[i[1]] = i[0]
-    keys = sorted(images_.keys())
-    #print(images_)
-    #for k1 in keys:
-        #for k2 in keys:
-            #if k1 < k2:
-                #print('%s with %s sim %.6f' % (k1, k2, np.dot(images_[k1], images_[k2])))
-
-    print('Recognition Complete! ')
+    #keys = sorted(images_.keys())
+	
+    print('Recognition Complete! Total Time is {0}'.format(time.time()-start))
