@@ -40,9 +40,9 @@ def parser():
     parser.add_argument('--devices',dest='devices',help='The GPU device to be used for recognition',
                         default='/gpu:0')
     parser.add_argument('--extractor_batch_size',dest='extractor_batch_size',help='Extractor batch size', 
-                        default=256, type=int)
+                        default=16, type=int)
     parser.add_argument('--aligner_batch_size',dest='aligner_batch_size',help='Anigner batch size',
-                        default=64, type=int)
+                        default=16, type=int)
     return parser.parse_args()
 
 def resize_face(im, a, b, c, d, max_height, max_width, enlarge=2.0):
@@ -85,7 +85,6 @@ def do_batch(f, x):
     return list(zip(imgs, keys))
 
 if __name__ == "__main__":
-    start = time.time() 
     # Parse arguments
     args = parser()
     args.devices = args.devices.split(',')
@@ -102,21 +101,39 @@ if __name__ == "__main__":
     assert os.path.isfile(args.prototxt),'Please provide a valid path for the prototxt!'
     assert os.path.isfile(args.model),'Please provide a valid path for the caffemodel!'
 
-    print('Loading the network...')
+    #print('Loading the network...')
     net = caffe.Net(args.prototxt, args.model, caffe.TEST)
     net.name = 'SSH'
-    print('Loading complete! Total time usage: {0} s'.format(time.time()-start))
-    print('Detection Start...')
+    #print('Loading complete! Total time usage: {0} s'.format(time.time()-start))
+    #print('Detection Start...')
     # Read image
     assert os.path.isfile(args.im_path),'Please provide a path to an existing image!'
-    pyramid = True if len(cfg.TEST.SCALES)>1 else False
-    im = cv2.imread(args.im_path)
+    # pyramid = True if len(cfg.TEST.SCALES)>1 else False
+    # use pyramid = false currently
+    pyramid = False 
+    
+    config = tf.ConfigProto() 
+    config.allow_soft_placement = False
+    config.gpu_options.allow_growth = True
+    session = tf.Session(config=config)
 
+    aligner = demo_0.aligner(session, args.devices, args.aligner_batch_size)
+    extractor = demo_0.extractor(session, args.devices, args.extractor_batch_size)
+
+    # Face cut list
+    images = []
+
+    #load image files
+    #for fname in os.listdir(args.im_path):
+	#if fname.lower().endswith(('.jpg','.png','.jpeg')):
+	    #im_comp_dir = os.pathjoin(im_path,fname)
+	    #TODO
+    im = cv2.imread(args.im_path)
+	
+    start = time.time() 
     # Perform detection
     cls_dets,_ = detect(net,im,visualization_folder=args.out_path,visualize=False,pyramid=pyramid)
     slice_idx = 0
-    # Face cut list
-    images = []
     for det in cls_dets:
         if det[4]>args.conf:
             slice_idx+=1
@@ -126,19 +143,11 @@ if __name__ == "__main__":
     print('Detection Complete! Total time usage: {0} s'.format(time.time()-start))
     # Perform recognition
     print('Recognition Start...')
-    config = tf.ConfigProto() 
-    config.allow_soft_placement = False
-    config.gpu_options.allow_growth = True
-    session = tf.Session(config=config)
-
-    aligner = demo_0.aligner(session, args.devices, args.aligner_batch_size)
-    extractor = demo_0.extractor(session, args.devices, args.extractor_batch_size)
-
 
     images = batch_process(lambda x:do_batch(aligner.align, x), images, args.aligner_batch_size)
-    for i in images:
-	if i[0][1] == False:
-	    cv2.imwrite('/SSH/faltyimg_'+str(i)+'.jpg',i[0][0])
+    #for i in images:
+	#if i[0][1] == False:
+	    #cv2.imwrite('/SSH/faltyimg_'+str(i)+'.jpg',i[0][0])
     images = [i[0] for i in images]
     print('%d samples aligned in %.6fs' % (len(images), time.time() - start))
     images_ = {}
