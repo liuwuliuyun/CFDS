@@ -8,7 +8,6 @@ method_name="ssh"
 file_name="SSH_models.tar.gz"
 cur_dir=${PWD##*/}
 target_dir="./data/"
-
 if [ $cur_dir = "scripts" ]; then
    target_dir="../data/"
 fi
@@ -26,7 +25,4 @@ tar -xvzf "${target_dir}${file_name}" -C ${target_dir}
 
 echo "Cleaning up..."
 rm "${target_dir}${file_name}"
-echo "All done!"
-
-
 

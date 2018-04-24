@@ -17,7 +17,7 @@ def parser():
     parser.add_argument('--db', dest='db_name', help='Path to the image',
                         default='wider_train', type=str)
     parser.add_argument('--gpus', dest='gpu_ids', help='The GPU id[s] to be used',
-                        default='0,1,2,3', type=str)
+                        default='0,1', type=str)
     parser.add_argument('--solver', dest='solver_proto', help='SSH caffe solver prototxt',
                         default='SSH/models/solver_ssh.prototxt', type=str)
     parser.add_argument('--out_path', dest='out_path', help='Output path for saving the figure',
@@ -29,9 +29,10 @@ def parser():
                         nargs=argparse.REMAINDER)
     parser.add_argument('--cfg', dest='cfg', help='Config file to overwrite the default configs',
                         default='SSH/configs/wider.yml', type=str)
+    # YLIU: Change wider.yml BATCHSIZE:128 -> BATCHSIZE:32
     parser.add_argument('--iters', dest='iters', help='Number of iterations for training the network',
-                        default=21000, type=int)
-
+                        default=84000, type=int)
+    # YLIU: Change iters default from 21000 to 84000
     return parser.parse_args()
 
 if __name__ == '__main__':

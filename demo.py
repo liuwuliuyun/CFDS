@@ -14,7 +14,7 @@ import caffe
 def parser():
     parser = ArgumentParser('SSH Demo!')
     parser.add_argument('--im',dest='im_path',help='Path to the image',
-                        default='data/demo/demo.jpg',type=str)
+                        default='data/demo/test1.png',type=str)
     parser.add_argument('--gpu',dest='gpu_id',help='The GPU ide to be used',
                         default=0,type=int)
     parser.add_argument('--proto',dest='prototxt',help='SSH caffe test prototxt',
@@ -24,7 +24,7 @@ def parser():
     parser.add_argument('--out_path',dest='out_path',help='Output path for saving the figure',
                         default='data/demo',type=str)
     parser.add_argument('--cfg',dest='cfg',help='Config file to overwrite the default configs',
-                        default='SSH/configs/wider_pyramid.yml',type=str)
+                        default='SSH/configs/yliu_wider.yml',type=str)
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -55,8 +55,10 @@ if __name__ == "__main__":
     pyramid = True if len(cfg.TEST.SCALES)>1 else False
 
     # Perform detection
-    cls_dets,_ = detect(net,args.im_path,visualization_folder=args.out_path,visualize=True,pyramid=pyramid)
-
+    cls_dets,_ = detect(net,args.im_path,visualization_folder=args.out_path,visualize=False,pyramid=pyramid)
+    #print("Detection Time Total is : {0} Average Time is : {1}".format(timers['detect'].total_time, timers['detect'].average_time))
+    #print("Mis Calculation Time Total is : {0} Average Time is {1}".format(timers['misc'].total_time, timers['misc'].average_time))
+    #print(cls_dets)
 
 
 
