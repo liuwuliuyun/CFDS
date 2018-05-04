@@ -990,9 +990,10 @@ class aligner:
         for pack, img in zip(batch_out, images):
             try:
                 bounding_boxes, points = pack
+                nrof_faces = bounding_boxes.shape[0]
             except:
                 results.append((cv2.resize(img[..., :: -1], (112, 112)), False))
-            nrof_faces = bounding_boxes.shape[0]
+                nrof_faces = 0
             _bbox = None
             _landmark = None
             if nrof_faces>0:
@@ -1007,9 +1008,10 @@ class aligner:
                     bindex = np.argmax(bounding_box_size-offset_dist_squared*2.0) # some extra weight on the centering
                 _bbox = bounding_boxes[bindex, 0:4]
                 _landmark = points[:, bindex].reshape( (2,5) ).T
-            warped = preprocess(img, bbox=_bbox, landmark = _landmark, image_size=(112, 112))
-            bgr = warped[...,::-1]
-            results.append((bgr, True))
+                #move one tab right
+                warped = preprocess(img, bbox=_bbox, landmark = _landmark, image_size=(112, 112))
+                bgr = warped[...,::-1]
+                results.append((bgr, True))
         return results
 
         
