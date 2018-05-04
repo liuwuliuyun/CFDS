@@ -19,7 +19,7 @@ import numpy as np
 import os
 import demo_0
 import time
-
+from  IPython import embed
 
 def parser():
     parser = ArgumentParser('SSH Demo!')
@@ -117,20 +117,16 @@ if __name__ == "__main__":
     config.gpu_options.allow_growth = True
     session = tf.Session(config=config)
 
-    aligner = demo_0.aligner(session, args.devices, args.aligner_batch_size)
+    aligner = demo_0.yliu_aligner.aligner(session, args.devices, args.aligner_batch_size)
     extractor = demo_0.extractor(session, args.devices, args.extractor_batch_size)
 
     # Face cut list
     images = []
 
-    #load image files
-    #for fname in os.listdir(args.im_path):
-	#if fname.lower().endswith(('.jpg','.png','.jpeg')):
-	    #im_comp_dir = os.pathjoin(im_path,fname)
-	    #TODO
     im = cv2.imread(args.im_path)
 	
     start = time.time() 
+    #embed()
     # Perform detection
     cls_dets,_ = detect(net,im,visualization_folder=args.out_path,visualize=False,pyramid=pyramid)
     slice_idx = 0
@@ -141,24 +137,14 @@ if __name__ == "__main__":
             #cv2.imwrite('data/demo'+str(slice_idx)+'.jpg',temp_face)
             images.append((temp_face,'facecut_'+str(slice_idx)))
     print('Detection Complete! Total time usage: {0} s'.format(time.time()-start))
+    #embed()
     # Perform recognition
     print('Recognition Start...')
-
+    images*=5
     images = batch_process(lambda x:do_batch(aligner.align, x), images, args.aligner_batch_size)
-    #for i in images:
-	#if i[0][1] == False:
-	    #cv2.imwrite('/SSH/faltyimg_'+str(i)+'.jpg',i[0][0])
-    images = [i[0] for i in images]
+    images = [(i[0][0],i[1]) for i in images]
     print('%d samples aligned in %.6fs' % (len(images), time.time() - start))
-    images_ = {}
-    for i in images:
-        if i[1] not in images_:
-            images_[i[1]] = i[0]
     images = batch_process(lambda x:do_batch(extractor.extract, x), images, args.extractor_batch_size)
     print('%d samples extracted in %.6fs' % (len(images), time.time() - start))
-    images_  =  {}
-    for i in images:
-        images_[i[1]] = i[0]
-    #keys = sorted(images_.keys())
-	
+    	
     print('Recognition Complete! Total Time is {0}'.format(time.time()-start))
