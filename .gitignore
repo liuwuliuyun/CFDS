@@ -107,9 +107,4 @@ venv.bak/
 /data
 /cuda
 /nccl
-/detectiontest
-/recognitiontest
-/scripts
-main_test.py
-main_train.py
-demo.py
+/test
