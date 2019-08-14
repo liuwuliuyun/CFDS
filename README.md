@@ -4,6 +4,8 @@ Contributer: Dongfeng Yu, Yun Liu
 
 ## Facial Detection System
 
+This project is a simple prototype of building commertial facial recognition system and also collects data for CFDDB(github.com/liuwuliuyun/CFDDB).
+
 We use *SSH* Algorithm for face detection
 
 The SSH part of this project is modified based on the work of Najibi, Mahyar and Samangouei, Pouya and Chellappa, Rama and Davis, Larry
